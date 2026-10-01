@@ -1,14 +1,19 @@
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 const app = express()
 
 app.use(cors())
 app.use(express.json())
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 
 // =====================================
-// DATOS
+// DATOS DE LA API
 // =====================================
 
 const horarios = [
@@ -45,6 +50,24 @@ const horarios = [
         hora: "16:00",
         estado: "Disponible",
         precio: 60,
+        tipo: "Cancha sintética",
+        duracion: "60 minutos"
+    },
+    {
+        id: 5,
+        fecha: "2026-10-02",
+        hora: "18:00",
+        estado: "Reservado",
+        precio: 70,
+        tipo: "Cancha sintética",
+        duracion: "60 minutos"
+    },
+    {
+        id: 6,
+        fecha: "2026-10-03",
+        hora: "20:00",
+        estado: "Disponible",
+        precio: 80,
         tipo: "Cancha sintética",
         duracion: "60 minutos"
     }
@@ -89,7 +112,6 @@ const promociones = [
 // =====================================
 
 app.get('/api', (req, res) => {
-
     res.json({
         mensaje: "API Arena Fútbol funcionando correctamente",
         endpoints: {
@@ -98,7 +120,6 @@ app.get('/api', (req, res) => {
             promociones: "/api/promociones"
         }
     })
-
 })
 
 
@@ -107,14 +128,11 @@ app.get('/api', (req, res) => {
 // =====================================
 
 app.get('/api/horarios', (req, res) => {
-
     res.json(horarios)
-
 })
 
 
 app.get('/api/horarios/:id', (req, res) => {
-
     const id = Number(req.params.id)
 
     const horario = horarios.find(
@@ -122,15 +140,12 @@ app.get('/api/horarios/:id', (req, res) => {
     )
 
     if (!horario) {
-
         return res.status(404).json({
             mensaje: "Horario no encontrado"
         })
-
     }
 
     res.json(horario)
-
 })
 
 
@@ -139,9 +154,7 @@ app.get('/api/horarios/:id', (req, res) => {
 // =====================================
 
 app.get('/api/servicios', (req, res) => {
-
     res.json(servicios)
-
 })
 
 
@@ -150,50 +163,53 @@ app.get('/api/servicios', (req, res) => {
 // =====================================
 
 app.get('/api/promociones', (req, res) => {
-
     res.json(promociones)
-
 })
 
 
 // =====================================
-// RUTA PRINCIPAL
+// SERVIR FRONTEND COMPILADO
 // =====================================
 
-app.get('/', (req, res) => {
+const distPath = path.join(__dirname, 'dist')
 
-    res.json({
-        mensaje: "Bienvenido a Arena Fútbol",
-        api: "/api"
-    })
+app.use(
+    express.static(distPath)
+)
 
+
+// =====================================
+// FRONTEND PARA CUALQUIER RUTA NO API
+// =====================================
+
+app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(
+        path.join(distPath, 'index.html')
+    )
 })
 
 
 // =====================================
-// RUTA NO ENCONTRADA
+// ERROR API
 // =====================================
 
-app.use((req, res) => {
-
+app.use('/api', (req, res) => {
     res.status(404).json({
-        mensaje: "Ruta no encontrada"
+        mensaje: "Ruta API no encontrada"
     })
-
 })
 
 
 // =====================================
-// SERVIDOR
+// PUERTO
 // =====================================
 
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
-
-    console.log("======================================")
-    console.log("API NUEVA DE ARENA FÚTBOL")
-    console.log(`http://localhost:${PORT}/api`)
-    console.log("======================================")
-
+    console.log("===================================")
+    console.log("ARENA FÚTBOL FUNCIONANDO")
+    console.log(`Puerto: ${PORT}`)
+    console.log(`API: http://localhost:${PORT}/api`)
+    console.log("===================================")
 })
