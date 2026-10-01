@@ -456,8 +456,7 @@ document.querySelector('#app').innerHTML = `
 // API
 // ========================================
 
-const API_URL =
-    'http://localhost:3000/api/horarios'
+const API_URL = '/api/horarios'
 
 
 
